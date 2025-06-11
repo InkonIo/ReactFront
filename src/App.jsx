@@ -21,8 +21,9 @@ function AgroDashboard() {
   const fetchData = () => {
   setLoading(true);
   setError('');
+  const endpoint = mode === 'weather' ? '/api/weather' : '/api/soil'; // Выбор эндпоинта
   axios
-    .get(`${import.meta.env.VITE_API_URL}/api/auth/login`)
+    .get(`${import.meta.env.VITE_API_URL}${endpoint}`, { withCredentials: true }) // credentials если включено CORS с куками
     .then((res) => {
       if (mode === 'weather') {
         setWeather(res.data);
