@@ -21,9 +21,8 @@ function AgroDashboard() {
   const fetchData = () => {
   setLoading(true);
   setError('');
-  const endpoint = mode === 'weather' ? '/api/weather' : '/api/soil'; // Выбор эндпоинта
   axios
-    .get(`${import.meta.env.VITE_API_URL}${endpoint}`, { withCredentials: true }) // credentials если включено CORS с куками
+    .get(`${import.meta.env.VITE_API_URL}/api/auth/login`)
     .then((res) => {
       if (mode === 'weather') {
         setWeather(res.data);
@@ -36,7 +35,6 @@ function AgroDashboard() {
     .catch(() => setError('Ошибка при загрузке данных'))
     .finally(() => setLoading(false));
 };
-
 
 
   const kelvinToCelsius = (k) => (k - 273.15).toFixed(1);
