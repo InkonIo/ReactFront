@@ -22,7 +22,7 @@ function AgroDashboard() {
   setLoading(true);
   setError('');
   axios
-    .get(`${import.meta.env.VITE_API_URL}/api/${mode}/yourPolygonIdHere`)
+    .get(`${import.meta.env.VITE_API_URL}/api/auth/login`)
     .then((res) => {
       if (mode === 'weather') {
         setWeather(res.data);
