@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Link } from 'react-router-dom';
-import './profileheader.css';
+import './ProfileHeader.css';
 
 export default function ProfileHeader({ onSettingsClick = () => {} }) {
   const [activeSection, setActiveSection] = useState('home');
