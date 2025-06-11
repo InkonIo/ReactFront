@@ -19,22 +19,23 @@ function AgroDashboard() {
   const [error, setError] = useState('');
 
   const fetchData = () => {
-    setLoading(true);
-    setError('');
-    axios
-      .get(`http://localhost:8080/api/${mode}/yourPolygonIdHere`)
-      .then((res) => {
-        if (mode === 'weather') {
-          setWeather(res.data);
-          setSoil(null);
-        } else {
-          setSoil(res.data);
-          setWeather(null);
-        }
-      })
-      .catch(() => setError('Ошибка при загрузке данных'))
-      .finally(() => setLoading(false));
-  };
+  setLoading(true);
+  setError('');
+  axios
+    .get(`${import.meta.env.VITE_API_URL}/api/${mode}/yourPolygonIdHere`)
+    .then((res) => {
+      if (mode === 'weather') {
+        setWeather(res.data);
+        setSoil(null);
+      } else {
+        setSoil(res.data);
+        setWeather(null);
+      }
+    })
+    .catch(() => setError('Ошибка при загрузке данных'))
+    .finally(() => setLoading(false));
+};
+
 
   const kelvinToCelsius = (k) => (k - 273.15).toFixed(1);
 
