@@ -17,6 +17,7 @@ export default function RegistrationModal({ onClose, onSuccess }) {
   const [recoveryCode, setRecoveryCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [repeatNewPassword, setRepeatNewPassword] = useState("");
+  const [keepMeLoggedIn, setKeepMeLoggedIn] = useState(false);
 
   const navigate = useNavigate();
 
@@ -24,6 +25,12 @@ export default function RegistrationModal({ onClose, onSuccess }) {
     const particles = [];
     const particleCount = 50;
     const container = document.querySelector('.registration-modal');
+
+    const token = localStorage.getItem('token');
+
+    if (token) {
+      setIsRegistered(true);
+    }
 
     if (!container) return;
 
@@ -70,23 +77,23 @@ export default function RegistrationModal({ onClose, onSuccess }) {
       const response = await fetch('http://localhost:8080/api/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ username: login, email, password }),
       });
 
+      const result = await response.json();
       if (!response.ok) {
-        const errorData = await response.json();
-        setError(errorData.message || 'Ошибка регистрации');
+        setError(result.message || 'Ошибка регистрации');
         return;
       }
 
       navigate('/');
-
     } catch (err) {
-      setError('Ошибка сети или сервера');
+      setError('Перейдите на вход');
     }
   }
 
-  const handleLogin = async (e) => {
+  async function handleLogin(e) {
     e.preventDefault();
     setError("");
 
@@ -96,14 +103,21 @@ export default function RegistrationModal({ onClose, onSuccess }) {
     }
 
     try {
-      const response = await fetch('http://localhost:8080/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username: login, password }),
+      const response = await fetch("http://localhost:8080/api/auth/login", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+          username: login,
+          password: password,
+          "remember-me": keepMeLoggedIn ? "true" : "false"
+        })
       });
 
-      let data;
       const text = await response.text();
+      let data;
 
       try {
         data = JSON.parse(text);
@@ -112,13 +126,7 @@ export default function RegistrationModal({ onClose, onSuccess }) {
       }
 
       if (!response.ok) {
-        if (typeof data === "object" && data.message) {
-          setError(data.message);
-        } else if (typeof data === "string") {
-          setError(data);
-        } else {
-          setError("Ошибка авторизации");
-        }
+        setError(typeof data === "object" && data.message ? data.message : data || "Ошибка авторизации");
         return;
       }
 
@@ -128,16 +136,14 @@ export default function RegistrationModal({ onClose, onSuccess }) {
 
       setIsRegistered(true);
       onSuccess();
-
       navigate('/');
-
     } catch (err) {
       console.error("Fetch error:", err);
       setError("Ошибка сети или сервера");
     }
-  };
+  }
 
-  const handleRecoverPassword = (e) => {
+  function handleRecoverPassword(e) {
     e.preventDefault();
     setError("");
 
@@ -164,14 +170,14 @@ export default function RegistrationModal({ onClose, onSuccess }) {
       setRepeatNewPassword("");
       setError("");
     }
-  };
+  }
 
-  const startRecovery = () => {
+  function startRecovery() {
     setIsRecovering(true);
     setRecoveryStep(1);
     setError("");
     alert("Код восстановления отправлен на почту.");
-  };
+  }
 
   if (isRegistered) return <Map />;
 
@@ -184,17 +190,11 @@ export default function RegistrationModal({ onClose, onSuccess }) {
             <div className="auth-tabs">
               <div
                 className={`auth-tab ${!isLoginMode ? 'active' : ''}`}
-                onClick={() => {
-                  setIsLoginMode(false);
-                  setError("");
-                }}
+                onClick={() => { setIsLoginMode(false); setError(""); }}
               >SIGN UP</div>
               <div
                 className={`auth-tab ${isLoginMode ? 'active' : ''}`}
-                onClick={() => {
-                  setIsLoginMode(true);
-                  setError("");
-                }}
+                onClick={() => { setIsLoginMode(true); setError(""); }}
               >SIGN IN</div>
             </div>
           )}
@@ -232,7 +232,7 @@ export default function RegistrationModal({ onClose, onSuccess }) {
                 <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
               </div>
               <label className="checkbox-label">
-                <input type="checkbox" />
+                <input type="checkbox" checked={keepMeLoggedIn} onChange={(e) => setKeepMeLoggedIn(e.target.checked)} />
                 <span className="checkmark"></span>
                 Keep me logged in
               </label>
